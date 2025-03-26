@@ -25,7 +25,7 @@ Número de rutas:
 Número total de propiedades de fecha: 2<br>
 Número total de propiedades booleanas: 2<br>
 Número total de resto de propiedades: 7<br>
-
+------------------------------------------------------------------------------------<br>
 Debería dar:
 
 Número total de secciones: 3<br>
