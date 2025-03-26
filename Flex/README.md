@@ -15,24 +15,24 @@
 
 Debería dar:
 
-Número total de secciones: 2
-Número total de propiedades: 13
+Número total de secciones: 2<br>
+Número total de propiedades: 13<br>
 La sección «Database» es la sección con más propiedades, con 8 propiedades.
 Número de rutas:
   - Windows: 1
-  - Unix: 1
-Número total de propiedades de fecha: 2
-Número total de propiedades booleanas: 2
-Número total de resto de propiedades: 7
+  - Unix: 1<br>
+Número total de propiedades de fecha: 2<br>
+Número total de propiedades booleanas: 2<br>
+Número total de resto de propiedades: 7<br>
 
 Debería dar:
 
-Número total de secciones: 3
-Número total de propiedades: 12
-La sección «Settings» es la sección con más propiedades, con 5 propiedades.
+Número total de secciones: 3<br>
+Número total de propiedades: 12<br>
+La sección «Settings» es la sección con más propiedades, con 5 propiedades.<br>
 Número de rutas:
   - Windows: 0
   - Unix: 0
-Número total de propiedades de fecha: 0
-Número total de propiedades booleanas: 1
-Número total de resto de propiedades: 11
+Número total de propiedades de fecha: 0<br>
+Número total de propiedades booleanas: 1<br>
+Número total de resto de propiedades: 11<br>
