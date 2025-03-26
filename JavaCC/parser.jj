@@ -1,0 +1,437 @@
+PARSER_BEGIN(Compilador)
+
+/**
+ * Clase principal del compilador.
+ * Contiene métodos para manejar etiquetas y ejecutar el análisis sintáctico.
+ */
+public class Compilador {
+
+    // Contador para etiquetas
+    static private int label = -1;
+
+    // Método para obtener la siguiente etiqueta
+    private static int getNextLBL() { return ++label; }
+
+    // Método para obtener la etiqueta actual
+    private static int getCurrentLBL() { return label; }
+
+    public static void main(String[] args) throws Exception {
+        System.out.println("-----------------------------------");
+        System.out.println("Bienvenidos al compilador de JavaCC");
+        System.out.println("-----------------------------------");
+
+        // Instancia del compilador
+        Compilador parser;
+        if (args.length > 0) {
+            // Si se pasa un archivo como argumento, lo usa como entrada
+            parser = new Compilador(new java.io.FileInputStream(args[0]));
+        } else {
+            // Si no hay archivo, usa la entrada estándar
+            parser = new Compilador(System.in);
+        }
+            // Inicia el análisis sintáctico llamando a la regla inicial
+            parser.program(); // Inicia el proceso de parsing
+            System.out.println("-----------------------------------");
+            System.out.println("Ha compilado correctamente");
+            System.out.println("-----------------------------------");
+
+        System.out.println("Compilador hecho por Jon Ander Incera");
+    }
+}
+
+PARSER_END(Compilador)
+
+// Definición de espacios en blanco y comentarios
+SKIP : {
+    // Ignorar espacios, tabulaciones, saltos de línea y comentarios
+    " " | "\t" | "\n" | "\r" 
+    // Comentarios multi-línea
+  | <COMENTARIO: "*>" (~["\n", "\r"])* >
+    // Comentarios de línea
+  | <COMENTARIO_LINEA: "      *" (~["\n", "\r"])* >
+}
+
+// Definición de tokens
+TOKEN : {
+    // Palabras clave del lenguaje y literales
+    < PROGRAM: "PROGRAM" > // Inicio del programa
+    | < BEGIN: "BEGIN" > // Bloque inicial
+    | < END: "END" > // Bloque final
+    | < IF: "IF" > // Condicional
+    | < THEN: "THEN" > // Parte del condicional
+    | < ELSE: "ELSE" > // Parte alternativa del condicional
+    | < MOVE: "MOVE" > // Asignación
+    | < DISPLAY: "DISPLAY" > // Salida
+    | < ACCEPT: "ACCEPT" > // Entrada
+    | < VARYING: "VARYING" > // Declaración de bucles
+    | < TO: "TO" > // Límite superior de un bucle
+    | < BY: "BY" > // Incremento de un bucle
+    | < FROM: "FROM" > // Límite inferior de un bucle
+    | < DO: "DO" > // Bloque de ejecución de bucle
+    | < WHILE: "WHILE" > // Condición de bucle
+    | < GREATER: "GREATER" > // Operador mayor
+    | < LESS: "LESS" > // Operador menor
+    | < THAN: "THAN" > // Parte de comparadores
+    | < IS: "IS" > // Comparador
+    | < EQUAL: "EQUAL" > // Comparador igual
+    | < NUM: (["0"-"9"])+ > // Números
+    | < CAD: "\"" (~["\\", "\""])* "\"" | "'" (~["\\", "'"])* "'" > // Cadenas de texto
+    | < ADD: "ADD" > // Suma
+    | < SUBTRACT: "SUBTRACT" > // Resta
+    | < MULTIPLY: "MULTIPLY" > // Multiplicación
+    | < DIVIDE: "DIVIDE" > // División
+    | < DOT: "." > // Punto
+    | < GIVING: "GIVING" > // Resultado de operaciones aritméticas
+    | < NOT: "NOT" > // Negación lógica
+    | < ID: (["A"-"Z"])(["A"-"Z", "0"-"9", "-"])* > // Identificadores
+}
+
+
+/*No terminal  : program()
+  Terminales   : ID DOT BEGIN END
+  Producciones : <PROGRAM> <ID> <DOT> <BEGIN> stmts() <END>
+  Return       : void
+  Variables    : ---
+ */
+void program() : {} {
+    <PROGRAM> <ID> <DOT> <BEGIN> stmts() <END>
+}
+
+/* 
+No terminal  : stmts
+Terminales   : Ninguno directamente, ya que depende de las reglas derivadas por stmt.
+Producciones : Una o más apariciones de stmt.
+Return       : void
+Variables    : ---
+*/
+void stmts() : {} {
+    // Repite la regla stmt (una sentencia) de forma opcional y puede ejecutarse múltiples veces.
+    (stmt())*
+}
+
+
+/* 
+No terminal  : stmt()
+Terminales   : DOT
+Producciones : loop() <DOT> | cond() <DOT> | io() <DOT> | assig() <DOT>
+Return       : void
+Variables    : ---
+*/
+void stmt() : {} {
+    ( loop() <DOT> | cond() <DOT> | io() <DOT> | assig() <DOT> )
+}
+
+
+/* 
+No terminal  : loop()
+Terminales   : WHILE, VARYING, ID, FROM, TO, BY, DO, END
+Producciones : 
+    - <WHILE> booleanExpr() <DO> stmts() <END>
+    - <VARYING> <ID> [<FROM> atomic()] [<TO> atomic()] [<BY> atomic()] <DO> stmts() <END>
+Return       : void
+Variables    : 
+    - int startLBL: Etiqueta de inicio del bucle.
+    - int endLBL: Etiqueta de fin del bucle.
+    - Token id: Identificador usado en el bucle (si aplica).
+*/
+void loop() : { int startLBL, endLBL; Token id; } {
+    {
+        // Generar etiquetas para el inicio y fin del bucle
+        startLBL = getNextLBL();
+        endLBL = getNextLBL();
+        // Imprimir la etiqueta de inicio del bucle
+        System.out.println("LBL" + startLBL + ":");
+    }
+    // Manejo de los dos tipos de bucles permitidos:
+    ((<WHILE> booleanExpr()) // Bucle WHILE con una expresión booleana como condición
+    | (<VARYING> <ID> // Bucle VARYING con un identificador
+        [<FROM> atomic()] // Valor inicial opcional
+        [<TO> atomic()] // Valor final opcional
+        [<BY> atomic()] // Incremento opcional
+    )) <DO> {
+        // Instrucción de salto si la condición es falsa
+        System.out.println("\tsifalsovea LBL" + endLBL);
+    }
+    // Bloque de sentencias dentro del cuerpo del bucle
+    stmts() {
+        // Instrucción para volver al inicio del bucle
+        System.out.println("\tvea LBL" + startLBL);
+        // Etiqueta de fin del bucle
+        System.out.println("LBL" + endLBL + ":");
+    }
+    // Fin del bucle
+    <END>
+}
+
+/* 
+No terminal  : cond()
+Terminales   : IF, THEN, ELSE, END
+Producciones : 
+    - <IF> booleanExpr() <THEN> stmts() [<ELSE> stmts()] <END>
+Return       : void
+Variables    : 
+    - int elseLBL: Etiqueta para el bloque ELSE, usada para el salto condicional.
+    - int endLBL: Etiqueta para el final de la estructura IF-THEN-ELSE.
+*/
+void cond() : {} {
+    <IF> booleanExpr() <THEN> {
+        // Generar etiquetas para el bloque ELSE y el fin de la estructura
+        int elseLBL = getNextLBL();
+        int endLBL = getNextLBL();
+        // Instrucción para saltar al bloque ELSE si la condición es falsa
+        System.out.println("\tsifalsovea LBL" + elseLBL);
+    }
+    // Sentencias que se ejecutan si la condición es verdadera
+    stmts()
+    [
+        // Bloque ELSE opcional
+        <ELSE> {
+            // Etiqueta para marcar el inicio del bloque ELSE
+            System.out.println("LBL" + elseLBL + ":");
+        }
+        // Sentencias dentro del bloque ELSE
+        stmts()
+    ]
+    <END> {
+        // Etiqueta para marcar el final de toda la estructura IF-THEN-ELSE
+        System.out.println("LBL" + endLBL + ":");
+    }
+}
+
+/* 
+No terminal  : io()
+Terminales   : DISPLAY, ACCEPT, ID, ","
+Producciones : 
+    - <DISPLAY> literal() ("," literal())*
+    - <ACCEPT> <ID>
+Return       : void
+Variables    : 
+    - Token tk: Representa el identificador usado en la instrucción ACCEPT.
+*/
+void io() : { Token tk; } {
+    // Primera producción: Instrucción DISPLAY
+    <DISPLAY> literal() // Imprime un literal en la salida estándar
+    ("," literal())* { // Permite imprimir múltiples literales separados por comas
+        System.out.println("\tprint 2"); // Genera el código para imprimir
+    } 
+    | 
+    // Segunda producción: Instrucción ACCEPT
+    <ACCEPT> tk=<ID> { 
+        // Genera el código para leer un valor y asignarlo al identificador
+        System.out.println("\tlee " + tk.image); 
+    }
+}
+
+/* 
+No terminal  : literal()
+Terminales   : ID, NUM, CAD
+Producciones : <ID> | <NUM> | <CAD>
+Return       : void
+Variables    : 
+    - Token token: Representa el literal procesado (identificador, número o cadena).
+*/
+void literal() : { Token token; } {
+    // Procesa un identificador y genera código para cargar su valor
+    (token=<ID> { 
+        System.out.println("\tvalord " + token.image); 
+    } 
+    // Procesa un número y genera código para cargarlo en la pila
+    | token=<NUM> { 
+        System.out.println("\tmete " + token.image); 
+    } 
+    // Procesa una cadena y genera código para cargarla en la pila
+    | token=<CAD> { 
+        System.out.println("\tmetecad " + token.image); 
+    })
+}
+
+/* 
+No terminal  : atomic()
+Terminales   : ID, NUM
+Producciones : <ID>|<NUM>
+Return       : void
+Variables    : ---
+*/
+void atomic() : {} {
+    // Procesa un identificador (ID)
+    <ID> 
+    | 
+    // Procesa un número (NUM)
+    <NUM>
+}
+
+/* 
+No terminal  : assig()
+Terminales   : MOVE, ADD, SUBTRACT, MULTIPLY, DIVIDE, TO, FROM, BY, GIVING, ID
+Producciones : 
+    - <MOVE> expr() <TO> <ID>
+    - <ADD> expr() <TO> <ID>
+    - <SUBTRACT> expr() <FROM> <ID>
+    - <MULTIPLY> expr() <BY> expr() <GIVING> <ID>
+    - <DIVIDE> expr() <BY> expr() <GIVING> <ID>
+Return       : void
+Variables    : 
+    - Token id: Representa el identificador para la asignación.
+    - Token id1: Usado en el caso de la operación de resta (SUBTRACT).
+    - Token id2: Usado en el caso de las operaciones de multiplicación y división (MULTIPLY, DIVIDE).
+*/
+void assig() : { Token id; Token id1; Token id2; } {
+    // Asignación simple (MOVE)
+    <MOVE> expr() <TO> id=<ID> {
+        // Genera el código para asignar un valor a un identificador
+        System.out.println("\tvalori " + id.image);
+        System.out.println("\tswap"); // Intercambia el valor
+        System.out.println("\tasigna"); // Realiza la asignación
+    }
+    |
+    // Operación de suma (ADD)
+    <ADD> expr() <TO> id=<ID> {
+        // Genera el código para sumar un valor a un identificador
+        System.out.println("\tvalord " + id.image); // Obtiene el valor del identificador
+        System.out.println("\tadd"); // Realiza la suma
+        System.out.println("\tvalori " + id.image); // Carga el nuevo valor al identificador
+        System.out.println("\tswap");
+        System.out.println("\tasigna");
+    }
+    |
+    // Operación de resta (SUBTRACT)
+    <SUBTRACT> expr() <FROM> id=<ID> {
+        // Genera el código para restar un valor de un identificador
+        System.out.println("\tvalord " + id.image); // Obtiene el valor de id
+        System.out.println("\tswap"); // Intercambia los valores
+        System.out.println("\tsub"); // Realiza la resta
+        System.out.println("\tvalori " + id.image); // Asigna el nuevo valor a id
+        System.out.println("\tswap");
+        System.out.println("\tasigna");
+    }
+    |
+    // Operación de multiplicación (MULTIPLY)
+    <MULTIPLY> expr() <BY> expr() <GIVING> id2=<ID> {
+        // Realiza la multiplicación entre dos expresiones
+        System.out.println("\tmul"); // Multiplica los valores
+        System.out.println("\tvalori " + id2.image); // Carga el resultado a id2
+        System.out.println("\tswap");
+        System.out.println("\tasigna");
+    }
+    |
+    // Operación de división (DIVIDE)
+    <DIVIDE> expr() <BY> expr() <GIVING> id2=<ID> {
+        // Realiza la división entre dos expresiones
+        System.out.println("\tdiv"); // Divide los valores
+        System.out.println("\tvalori " + id2.image); // Asigna el resultado de la división
+        System.out.println("\tswap");
+        System.out.println("\tasigna");
+    }
+}
+
+/* 
+No terminal  : expr()
+Terminales   : +, -, NUM, ID
+Producciones : 
+    - mult() ( ("+" mult()) | ("-" mult()) )*
+Return       : void
+Variables    : ---
+*/
+void expr() : {} {
+    // Expresión que puede consistir en una multiplicación seguida de operadores "+" o "-"
+    mult() // Primer término de la expresión (multiplicación o valor)
+    ( 
+        // Si encuentra un operador de adición "+"
+        ("+" mult() { 
+            System.out.println("\tadd"); // Genera el código para realizar la suma
+        }) 
+        | 
+        // Si encuentra un operador de sustracción "-"
+        ("-" mult() { 
+            System.out.println("\tsub"); // Genera el código para realizar la resta
+        })
+    )*
+}
+
+/* 
+No terminal  : mult()
+Terminales   : *, /, NUM, ID
+Producciones : 
+    - val() ( ("*" val()) | ("/" val()) )*
+Return       : void
+Variables    : ---
+*/
+void mult() : {} {
+    // Expresión de multiplicación o división
+    val() // Primer valor de la operación (número o identificador)
+    ( 
+        // Si encuentra un operador de multiplicación "*"
+        ("*" val() { 
+            System.out.println("\tmul"); // Genera el código para multiplicar
+        }) 
+        | 
+        // Si encuentra un operador de división "/"
+        ("/" val() { 
+            System.out.println("\tdiv"); // Genera el código para dividir
+        })
+    )*
+}
+
+/* 
+No terminal  : val()
+Terminales   : NUM, ID, (, )
+Producciones : 
+    - <NUM>
+    - <ID>
+    - "(" expr() ")"
+Return       : void
+Variables    : 
+    - token: Representa el token de tipo NUM o ID.
+*/
+void val() : { Token token; } {
+    // Si se encuentra un número (NUM), se genera el código para almacenarlo
+    token=<NUM> { 
+        System.out.println("\tmete " + token.image); // Almacena el valor del número
+    }
+    | 
+    // Si se encuentra un identificador (ID), se genera el código para cargar su valor
+    token=<ID> { 
+        System.out.println("\tvalord " + token.image); // Carga el valor del identificador
+    }
+    | 
+    // Si se encuentra una expresión entre paréntesis, se procesa la expresión
+    "(" expr() ")" 
+}
+
+/* 
+No terminal  : booleanExpr()
+Terminales   : IS, NOT, EQUAL, GREATER, THAN, LESS, TO, NUM, ID
+Producciones : 
+    - expr() <IS> (operador) expr()
+Return       : void
+Variables    : 
+    - operador: Almacena el operador de la comparación booleana.
+*/
+void booleanExpr() : { String operador; } {
+    // Procesa la expresión booleana que comienza con una expresión
+    expr() // Primera expresión (puede ser un número, identificador o expresión más compleja)
+    <IS> // Palabra clave "IS"
+    (
+        // Si se encuentra "NOT EQUAL TO" ("IS NOT EQUAL TO")
+        (<NOT> <EQUAL> (<TO>)? { 
+            operador = "\tesigual\n\tnot"; // Almacena el operador de "NO IGUAL"
+        }) 
+        | 
+        // Si se encuentra "GREATER THAN" ("IS GREATER THAN")
+        (<GREATER> <THAN> { 
+            operador = "\tesmayor"; // Almacena el operador de "ES MAYOR"
+        }) 
+        | 
+        // Si se encuentra "LESS THAN" ("IS LESS THAN")
+        (<LESS> <THAN> { 
+            operador = "\tesmenor"; // Almacena el operador de "ES MENOR"
+        }) 
+        | 
+        // Si se encuentra "EQUAL TO" ("IS EQUAL TO")
+        (<EQUAL> (<TO>)? { 
+            operador = "\tesigual"; // Almacena el operador de "ES IGUAL"
+        })
+    )
+    // Segunda expresión a comparar (puede ser un número, identificador o expresión más compleja)
+    expr() 
+}
