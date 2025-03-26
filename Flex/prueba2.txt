@@ -1,0 +1,20 @@
+; Todos los atributos generales
+[General]
+app_name = MyApp
+version = 1.2.3
+quick.start.up = True
+
+# Los datos de red, con valores comentados
+[Network data]
+proxy_url = http://proxy.example.com:8080
+contact_email = support@example.com
+mac_address = 00:1A:2B:3C:4D:5E
+; mac_address = 10:AA:3C:94:2F:FE ; deprecated 
+ftp_server = ftp://ftp.example.net/files
+
+[Settings]
+max_active_connections = 100
+timeout_seconds = 60
+decimal_value = 3.14159
+scientific_value = 6.022e23
+negative_number = -42

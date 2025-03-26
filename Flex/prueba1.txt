@@ -1,0 +1,19 @@
+; Configuración de base de datos
+[Database]
+  Host=localhost
+  Port=3306
+  Last_backup=2024-09-01
+  Last.updated=30/02/2024
+  Data-path=C:\Databases\mydb
+  MaxConnections=100
+; [Root.information]
+  Username=root
+#  Password=one two three for ; old password
+  Password=1234
+
+[UI#attributes]
+  Theme=Dark
+  FontSize     = 12
+  ShowTooltips = True
+  HideMenu     = 0
+  Logo.path=/usr/share/app/logo.png
