@@ -140,3 +140,84 @@
       LBL6:
           vea LBL3
       LBL4:
+
+   ### Ejemplo 3
+          valori VAR
+          valord V
+          asigna
+      LBL0:
+          valord VAR
+          mete 3
+          mul
+          valori RES
+          swap
+          asigna
+          valord RES
+          print 1
+          valori VAR
+          valord VAR
+          mete 3
+          add
+          asigna
+          valord VAR
+          mete 50
+          esmenor
+          siciertovea LBL0
+          lee V
+          valori VAR
+          valord V
+          asigna
+      LBL2:
+          valord VAR
+          mete 20
+          esmayor
+          sifalsovea LBL4
+          valord VAR
+          print 1
+      LBL4:
+          valori VAR
+          valord VAR
+          mete 1
+          add
+          asigna
+          valord VAR
+          mete 100
+          esmenor
+          siciertovea LBL2
+          valori VAR
+          mete 1
+          asigna
+      LBL5:
+          valord VAR
+          mete 3
+          mul
+          valori RES
+          swap
+          asigna
+          valord RES
+          print 1
+          valori VAR
+          valord VAR
+          mete 3
+          add
+          asigna
+          valord VAR
+          mete 50
+          esmenor
+          siciertovea LBL5
+          valori VAR
+          valord V
+          asigna
+      LBL7:
+          valord VAR
+          print 1
+          valori VAR
+          valord VAR
+          mete 1
+          add
+          asigna
+          valord VAR
+          mete 50
+          esmenor
+          siciertovea LBL7
+   
