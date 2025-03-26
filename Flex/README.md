@@ -1,10 +1,10 @@
 # Primera practica de flex
 
-# Pasos para ejecutar uma práctica de Flex:
+## Pasos para ejecutar uma práctica de Flex:
 1. Compila el archivo C generado.
    Usa un compilador de C, como gcc, para compilar lex.yy.c:
-   gcc lex.yy.c -o practica -lfl
-   -lfl enlaza las biblioteca libfl (flex library) necesaria.
+      gcc lex.yy.c -o practica -lfl
+      Nota: -lfl enlaza las biblioteca libfl (flex library) necesaria.
 2. Ejecuta el programa
    Una vez compilado, puedes ejecutarlo:
    ./practica
